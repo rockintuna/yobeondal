@@ -7,18 +7,20 @@
 
 import SwiftUI
 
-struct ContentView: View {
+struct LoadingView: View {
     var body: some View {
         VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+            Image("요번달")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .padding(60)
         }
         .padding()
     }
 }
 
-#Preview {
-    ContentView()
+struct LoadingView_Previews: PreviewProvider {
+    static var previews: some View {
+        LoadingView()
+    }
 }
