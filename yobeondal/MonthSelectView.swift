@@ -6,59 +6,85 @@
 //
 
 import SwiftUI
-import Foundation
 
 struct MonthSelectView: View {
     let numbers = Array(1...12)
     let columns = [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())]
-    @State private var selectedNumber: Int? // 선택된 숫자 저장
-
+    
     var body: some View {
-        selectedNumber == nil ? AnyView(monthGridView()) : AnyView(selectedMonthView())
-    }
+        NavigationStack {
+            VStack {
+                Text("\(formatYear(thisYear()))년")
+                    .font(.title)
+                    .foregroundColor(Color(red: 243/255, green: 212/255, blue:224/255))
 
-    // 숫자 선택 화면
-    func monthGridView() -> some View {
-        VStack {
-            Text("\(thisYear())년")
-                .font(.title)
-                .foregroundColor(Color(red: 243/255, green: 212/255, blue:224/255))
-            
-            LazyVGrid(columns: columns, spacing: 10) {
-                ForEach(numbers, id: \.self) { number in
-                    Button(action: {
-                        selectedNumber = number
-                    }) {
-                        Text("\(number)")
-                            .font(.title)
-                            .frame(width: 80, height: 80)
-                            .background(Color.white)
-                            .foregroundColor(Color(red: 243/255, green: 212/255, blue:224/255))
-                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                LazyVGrid(columns: columns, spacing: 10) {
+                    ForEach(numbers, id: \.self) { number in
+                        NavigationLink(destination: SelectedMonthView(year: thisYear(), month: number)) {
+                            Text("\(number)")
+                                .font(.title)
+                                .frame(width: 80, height: 80)
+                                .background(Color.white)
+                                .foregroundColor(Color(red: 243/255, green: 212/255, blue:224/255))
+                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                        }
                     }
                 }
+                .padding()
             }
-            .padding()
-        }
-    }
-
-    // 선택된 숫자 화면
-    func selectedMonthView() -> some View {
-        VStack {
-            Text("\(thisYear())년 \(selectedNumber!)월")
-                .font(.title)
-                .foregroundColor(.blue)
         }
     }
 }
 
+// 선택된 숫자 화면
+struct SelectedMonthView: View {
+    let year: Int
+    let month: Int
+    @StateObject var transactionViewModel: TransactionViewModel = TransactionViewModel()
+    
+    init(year: Int, month: Int) {
+        self.year = year
+        self.month = month
+    }
+    
+    var body: some View {
+        VStack {
+            Text("\(formatYear(year))년 \(month)월")
+                .font(.title)
+                .foregroundColor(.blue)
+            
+            if transactionViewModel.transactions.isEmpty {
+                Text("데이터를 불러오는 중...")
+            } else {
+                ForEach(getTransaction()) { transaction in
+                    Text(transaction.title + " \(transaction.amount)            " + transaction.title + " \(transaction.amount)")
+                }
+            }
+        }
+        .onAppear {
+            transactionViewModel.getTransactions(year, month)
+        }
+        .navigationTitle("\(month)월 선택됨")
+        .navigationBarTitleDisplayMode(.inline)
+    
+    }
+    
+    func getTransaction() -> [Transaction] {
+        self.transactionViewModel.transactions
+    }
+}
 
-func thisYear() -> String {
+// 현재 연도 반환 함수
+func thisYear() -> Int {
     let today = Date()
-    let formatter = DateFormatter()
-    formatter.dateFormat = "yyyy"
+    let calendar = Calendar.current
+    return calendar.component(.year, from: today)
+}
 
-    return formatter.string(from: today)
+func formatYear(_ year: Int) -> String {
+    let formatter = NumberFormatter()
+    formatter.numberStyle = .none // 쉼표 제거
+    return formatter.string(from: NSNumber(value: year)) ?? "\(year)"
 }
 
 struct MonthSelectView_Previews: PreviewProvider {
