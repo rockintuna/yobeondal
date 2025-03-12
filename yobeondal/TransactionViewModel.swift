@@ -29,7 +29,10 @@ class TransactionViewModel: ObservableObject {
         }
     }
     
-    var transactions: [Transaction] {
-        self.response
+    var transactionsForSJ: [Transaction] {
+        self.response.filter{$0.userName == "수진"}
+    }
+    var transactionsForJI: [Transaction] {
+        self.response.filter{$0.userName == "정인"}
     }
 }

@@ -48,29 +48,68 @@ struct SelectedMonthView: View {
     }
     
     var body: some View {
-        VStack {
-            Text("\(formatYear(year))년 \(month)월")
-                .font(.title)
-                .foregroundColor(.blue)
-            
-            if transactionViewModel.transactions.isEmpty {
-                Text("데이터를 불러오는 중...")
-            } else {
-                ForEach(getTransaction()) { transaction in
-                    Text(transaction.title + " \(transaction.amount)            " + transaction.title + " \(transaction.amount)")
+        HStack {
+            List(getTransactionsForSJ()) { transaction in
+                HStack {
+                    if transaction.amount >= 0 {
+                        Text(transaction.userName)
+                            .font(.system(size: 13))
+                        Spacer()
+                        Text("\(transaction.amount)")
+                            .font(.system(size: 13))
+                    } else {
+                        Text("🩷 " + transaction.title)
+                            .font(.system(size: 13))
+                        Spacer()
+                        Text("\(transaction.amount)")
+                            .font(.system(size: 13))
+                    }
                 }
+                .listRowSeparator(.hidden)
             }
+            .listStyle(.grouped)
+            .scrollContentBackground(.hidden)
+            
+            Divider()
+                .background(Color.black)
+                .frame(maxHeight: .infinity)
+                .padding(.vertical, 40)
+                .padding(.trailing, 0)
+            
+            List(getTransactionsForJI()) { transaction in
+                HStack {
+                    if transaction.amount >= 0 {
+                        Text(transaction.userName)
+                            .font(.system(size: 13))
+                        Spacer()
+                        Text("\(transaction.amount)")
+                            .font(.system(size: 13))
+                    } else {
+                        Text("🩷 " + transaction.title)
+                            .font(.system(size: 13))
+                        Spacer()
+                        Text("\(transaction.amount)")
+                            .font(.system(size: 13))
+                    }
+                }
+                .listRowSeparator(.hidden)
+            }
+            .listStyle(.grouped)
+            .scrollContentBackground(.hidden)
         }
         .onAppear {
             transactionViewModel.getTransactions(year, month)
         }
-        .navigationTitle("\(month)월 선택됨")
+        .navigationTitle(formatYear(year) + "년 \(month)월")
         .navigationBarTitleDisplayMode(.inline)
     
     }
     
-    func getTransaction() -> [Transaction] {
-        self.transactionViewModel.transactions
+    func getTransactionsForSJ() -> [Transaction] {
+        self.transactionViewModel.transactionsForSJ
+    }
+    func getTransactionsForJI() -> [Transaction] {
+        self.transactionViewModel.transactionsForJI
     }
 }
 
