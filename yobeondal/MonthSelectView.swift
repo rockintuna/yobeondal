@@ -42,6 +42,9 @@ struct SelectedMonthView: View {
     let month: Int
     @StateObject var transactionViewModel: TransactionViewModel = TransactionViewModel()
     
+    @State private var inputTitle: String = "" // 입력할 제목
+    @State private var inputAmount: String = "" // 입력할 금액
+    
     init(year: Int, month: Int) {
         self.year = year
         self.month = month
@@ -49,26 +52,61 @@ struct SelectedMonthView: View {
     
     var body: some View {
         HStack {
-            List(getTransactionsForSJ()) { transaction in
-                HStack {
-                    if transaction.amount >= 0 {
-                        Text(transaction.userName)
-                            .font(.system(size: 13))
-                        Spacer()
-                        Text("\(transaction.amount)")
-                            .font(.system(size: 13))
-                    } else {
-                        Text("🩷 " + transaction.title)
-                            .font(.system(size: 13))
-                        Spacer()
-                        Text("\(transaction.amount)")
-                            .font(.system(size: 13))
+            VStack {
+                List(getTransactions(1)) { transaction in
+                    HStack {
+                        if transaction.amount >= 0 {
+                            Text(transaction.title)
+                                .font(.system(size: 13))
+                            Spacer()
+                            Text("\(transaction.amount)")
+                                .font(.system(size: 13))
+                        } else {
+                            Text("🩷 " + transaction.title)
+                                .font(.system(size: 13))
+                            Spacer()
+                            Text("\(transaction.amount)")
+                                .font(.system(size: 13))
+                        }
                     }
+                    .listRowSeparator(.hidden)
                 }
-                .listRowSeparator(.hidden)
+                .background(Color.red)
+                .listStyle(.grouped)
+                .scrollContentBackground(.hidden)
+                
+                HStack {
+                    TextField("항목 이름", text: $inputTitle)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .frame(width: 120)
+                    
+                    TextField("금액", text: $inputAmount)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .frame(width: 80)
+                        .keyboardType(.numberPad) // 숫자 키보드
+                }
+                .padding()
+                
+                HStack {
+                    Text("Total")
+                        .font(.system(size: 13))
+                    Spacer()
+                        .background(Color.red)
+                    Text("\(getSumOfExpenses(1))")
+                        .font(.system(size: 13))
+                }
+                .frame(width: 160, height: 10)
+                HStack {
+                    Text("비상금")
+                        .font(.system(size: 13))
+                    Spacer()
+                        .background(Color.red)
+                    Text("\(getSumOfTransactions(1))")
+                        .font(.system(size: 13))
+                }
+                .frame(width: 160, height: 30)
+                .padding(.bottom, 30)
             }
-            .listStyle(.grouped)
-            .scrollContentBackground(.hidden)
             
             Divider()
                 .background(Color.black)
@@ -76,27 +114,52 @@ struct SelectedMonthView: View {
                 .padding(.vertical, 40)
                 .padding(.trailing, 0)
             
-            List(getTransactionsForJI()) { transaction in
-                HStack {
-                    if transaction.amount >= 0 {
-                        Text(transaction.userName)
-                            .font(.system(size: 13))
-                        Spacer()
-                        Text("\(transaction.amount)")
-                            .font(.system(size: 13))
-                    } else {
-                        Text("🩷 " + transaction.title)
-                            .font(.system(size: 13))
-                        Spacer()
-                        Text("\(transaction.amount)")
-                            .font(.system(size: 13))
+            VStack {
+                List(getTransactions(2)) { transaction in
+                    HStack {
+                        if transaction.amount >= 0 {
+                            Text(transaction.title)
+                                .font(.system(size: 13))
+                                .padding(.leading, -10)
+                            Spacer()
+                            Text("\(transaction.amount)")
+                                .font(.system(size: 13))
+                        } else {
+                            Text("🩷 " + transaction.title)
+                                .font(.system(size: 13))
+                                .padding(.leading, -10)
+                            Spacer()
+                            Text("\(transaction.amount)")
+                                .font(.system(size: 13))
+                        }
                     }
+                    .listRowSeparator(.hidden)
                 }
-                .listRowSeparator(.hidden)
+                .listStyle(.grouped)
+                .scrollContentBackground(.hidden)
+                
+                HStack {
+                    Text("Total")
+                        .font(.system(size: 13))
+                    Spacer()
+                        .background(Color.red)
+                    Text("\(getSumOfExpenses(2))")
+                        .font(.system(size: 13))
+                }
+                .frame(width: 160, height: 10)
+                HStack {
+                    Text("비상금")
+                        .font(.system(size: 13))
+                    Spacer()
+                        .background(Color.red)
+                    Text("\(getSumOfTransactions(2))")
+                        .font(.system(size: 13))
+                }
+                .frame(width: 160, height: 30)
+                .padding(.bottom, 30)
             }
-            .listStyle(.grouped)
-            .scrollContentBackground(.hidden)
         }
+        
         .onAppear {
             transactionViewModel.getTransactions(year, month)
         }
@@ -105,12 +168,50 @@ struct SelectedMonthView: View {
     
     }
     
-    func getTransactionsForSJ() -> [Transaction] {
-        self.transactionViewModel.transactionsForSJ
+    func getTransactions(_ userId: Int) -> [Transaction] {
+        if userId == 1 {
+            return self.transactionViewModel.transactionsForSJ
+        } else {
+            return self.transactionViewModel.transactionsForJI
+        }
     }
-    func getTransactionsForJI() -> [Transaction] {
-        self.transactionViewModel.transactionsForJI
+    
+    func getSumOfTransactions(_ userId: Int) -> Int {
+        if userId == 1 {
+            return self.transactionViewModel.transactionsForSJ
+                .map { $0.amount }  // 모든 amount 값 가져오기
+                .reduce(0, +)       // 합산
+        } else {
+            return self.transactionViewModel.transactionsForJI
+                .map { $0.amount }  // 모든 amount 값 가져오기
+                .reduce(0, +)       // 합산
+        }
     }
+    
+    func getSumOfExpenses(_ userId: Int) -> Int {
+        if userId == 1 {
+            return self.transactionViewModel.transactionsForSJ
+                .filter { $0.amount < 0 }  // 음수인 값만 필터링
+                .map { abs($0.amount) }    // 절대값 변환
+                .reduce(0, +)              // 합산
+        } else {
+            return self.transactionViewModel.transactionsForJI
+                .filter { $0.amount < 0 }  // 음수인 값만 필터링
+                .map { abs($0.amount) }    // 절대값 변환
+                .reduce(0, +)              // 합산
+        }
+    }
+    
+    func addTransaction() {
+            guard let amount = Int(inputAmount), !inputTitle.isEmpty else { return }
+            
+//            let newTransaction = Transaction(title: inputTitle, amount: amount)
+//            transactionViewModel.transactionsForSJ.append(newTransaction) // 리스트에 추가
+            
+            // 입력 필드 초기화
+            inputTitle = ""
+            inputAmount = ""
+        }
 }
 
 // 현재 연도 반환 함수
