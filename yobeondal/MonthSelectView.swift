@@ -6,10 +6,12 @@
 //
 
 import SwiftUI
+import PopupView
 
 struct MonthSelectView: View {
     let numbers = Array(1...12)
     let columns = [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())]
+    @Environment(\.presentationMode) var presentationMode
     
     var body: some View {
         NavigationStack {
@@ -44,20 +46,56 @@ struct SelectedMonthView: View {
     
     @State private var inputTitle: String = "" // 입력할 제목
     @State private var inputAmount: String = "" // 입력할 금액
+    @State private var isPresented: Bool = false
+    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
     
     init(year: Int, month: Int) {
         self.year = year
         self.month = month
     }
     
+
+    var backButton : some View {  // <-- 👀 커스텀 버튼
+        Button{
+            self.presentationMode.wrappedValue.dismiss()
+        } label: {
+            Image(systemName: "chevron.left") // 화살표 Image
+                .aspectRatio(contentMode: .fit)
+                .foregroundColor(Color.black)
+        }
+    }
+    
     var body: some View {
+        HStack {
+            Spacer()
+            Button {
+                isPresented.toggle()
+            } label: {
+                Image(systemName: "plus.circle")
+                    .foregroundColor(Color.black)
+                    .padding()  // 버튼 주변 여백 추가
+            }
+            .popup(isPresented: $isPresented) {
+                TargetView()
+            } customize: {
+                $0
+                    .position(.center)
+                    .animation(.spring())
+            }
+        }.padding(.trailing, 25)
+
         HStack {
             VStack {
                 List(getTransactions(1)) { transaction in
                     HStack {
                         if transaction.amount >= 0 {
-                            Text(transaction.title)
-                                .font(.system(size: 13))
+                            Button {
+                                isPresented.toggle()
+                            } label: {
+                                Text(transaction.title)
+                                    .foregroundStyle(Color.black)
+                                    .font(.system(size: 13))
+                            }
                             Spacer()
                             Text("\(transaction.amount)")
                                 .font(.system(size: 13))
@@ -71,21 +109,8 @@ struct SelectedMonthView: View {
                     }
                     .listRowSeparator(.hidden)
                 }
-                .background(Color.red)
                 .listStyle(.grouped)
                 .scrollContentBackground(.hidden)
-                
-                HStack {
-                    TextField("항목 이름", text: $inputTitle)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .frame(width: 120)
-                    
-                    TextField("금액", text: $inputAmount)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .frame(width: 80)
-                        .keyboardType(.numberPad) // 숫자 키보드
-                }
-                .padding()
                 
                 HStack {
                     Text("Total")
@@ -159,13 +184,14 @@ struct SelectedMonthView: View {
                 .padding(.bottom, 30)
             }
         }
-        
+        .padding(.top, -30)
         .onAppear {
             transactionViewModel.getTransactions(year, month)
         }
         .navigationTitle(formatYear(year) + "년 \(month)월")
         .navigationBarTitleDisplayMode(.inline)
-    
+        .navigationBarBackButtonHidden(true)
+        .navigationBarItems(leading: backButton)
     }
     
     func getTransactions(_ userId: Int) -> [Transaction] {
@@ -201,17 +227,13 @@ struct SelectedMonthView: View {
                 .reduce(0, +)              // 합산
         }
     }
-    
-    func addTransaction() {
-            guard let amount = Int(inputAmount), !inputTitle.isEmpty else { return }
-            
-//            let newTransaction = Transaction(title: inputTitle, amount: amount)
-//            transactionViewModel.transactionsForSJ.append(newTransaction) // 리스트에 추가
-            
-            // 입력 필드 초기화
-            inputTitle = ""
-            inputAmount = ""
-        }
+}
+
+struct TargetView: View {
+    var body: some View {
+        Text("Target")
+            .background(Color.red)
+    }
 }
 
 // 현재 연도 반환 함수

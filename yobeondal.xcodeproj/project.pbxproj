@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		687010092D845CE2003FB46F /* PopupView in Frameworks */ = {isa = PBXBuildFile; productRef = 687010082D845CE2003FB46F /* PopupView */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		68A666B52D7EF78E00A04CBB /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -65,6 +69,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				687010092D845CE2003FB46F /* PopupView in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -85,12 +90,20 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		687010072D845CE2003FB46F /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		68A6669B2D7EF78B00A04CBB = {
 			isa = PBXGroup;
 			children = (
 				68A666A62D7EF78B00A04CBB /* yobeondal */,
 				68A666B72D7EF78E00A04CBB /* yobeondalTests */,
 				68A666C12D7EF78E00A04CBB /* yobeondalUITests */,
+				687010072D845CE2003FB46F /* Frameworks */,
 				68A666A52D7EF78B00A04CBB /* Products */,
 			);
 			sourceTree = "<group>";
@@ -125,6 +138,7 @@
 			);
 			name = yobeondal;
 			packageProductDependencies = (
+				687010082D845CE2003FB46F /* PopupView */,
 			);
 			productName = yobeondal;
 			productReference = 68A666A42D7EF78B00A04CBB /* yobeondal.app */;
@@ -208,6 +222,9 @@
 			);
 			mainGroup = 68A6669B2D7EF78B00A04CBB;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				680BF2C62D844FD30048580A /* XCRemoteSwiftPackageReference "PopupView" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 68A666A52D7EF78B00A04CBB /* Products */;
 			projectDirPath = "";
@@ -577,6 +594,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		680BF2C62D844FD30048580A /* XCRemoteSwiftPackageReference "PopupView" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/exyte/PopupView.git";
+			requirement = {
+				kind = upToNextMinorVersion;
+				minimumVersion = 4.0.2;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		687010082D845CE2003FB46F /* PopupView */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 680BF2C62D844FD30048580A /* XCRemoteSwiftPackageReference "PopupView" */;
+			productName = PopupView;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 68A6669C2D7EF78B00A04CBB /* Project object */;
 }
