@@ -11,6 +11,7 @@ import SwiftUI
 class TransactionViewModel: ObservableObject {
     
     @Published var response: [Transaction] = []
+    @Published var upsertSuccess: Bool? = nil
     var httpClient = HTTPClient()
     
     func getTransactions(_ year: Int,_ month: Int) {
@@ -24,6 +25,22 @@ class TransactionViewModel: ObservableObject {
                 case .failure(let error):
                     print("❌ Error: \(error.localizedDescription)")
                     self.response = [] // 🚨 실패 시 UI 업데이트가 필요하다면 이렇게 할 수도 있음
+                }
+            }
+        }
+    }
+    
+    func upsertTransactions(_ tid: Int?, _ year: Int,_ month: Int,_ title: String,_ amount: Int,_ userId: Int) {
+        httpClient.upsertTransactions(tid, year, month, title, amount, userId) { result in
+            DispatchQueue.main.async { // ✅ 모든 결과 처리를 메인 스레드에서 실행
+                switch result {
+                case .success(let results):
+                    print("✅ Transaction upsert SUCCESS")
+                    self.upsertSuccess = true
+                    
+                case .failure(let error):
+                    print("❌ Error: \(error.localizedDescription)")
+                    self.upsertSuccess = false
                 }
             }
         }

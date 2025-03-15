@@ -76,7 +76,7 @@ struct SelectedMonthView: View {
                     .padding()  // 버튼 주변 여백 추가
             }
             .popup(isPresented: $isPresented) {
-                TargetView()
+                TransactionEditPopup()
             } customize: {
                 $0
                     .position(.center)
@@ -229,10 +229,41 @@ struct SelectedMonthView: View {
     }
 }
 
-struct TargetView: View {
+struct TransactionEditPopup: View {
+    @State private var title: String = ""  // 제목 입력
+    @State private var amount: String = "" // 금액 입력
+    @StateObject var transactionViewModel: TransactionViewModel = TransactionViewModel()
+    
     var body: some View {
-        Text("Target")
-            .background(Color.red)
+        VStack {
+            Text("Target")
+            TextField("제목 입력", text: $title)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .padding(.horizontal, 20)
+            TextField("금액 입력", text: $amount)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .keyboardType(.numberPad)
+                .padding(.horizontal, 20)
+            Button(action: show) {
+                Text("추가하기")
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(Color.blue)
+                .foregroundColor(.white)
+                .cornerRadius(10)
+            }
+            .padding(.horizontal, 20)
+            
+        }
+        .frame(width: 300, height: 200)
+        .background(Color.white)
+        .cornerRadius(20)
+        .shadow(radius: 10)
+    }
+    
+    func show() {
+        print("title " + title)
+        print("amount /(amount)")
     }
 }
 

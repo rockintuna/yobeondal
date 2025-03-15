@@ -8,6 +8,12 @@
 import Foundation
 
 struct Transaction: Identifiable, Codable {
+    init(title: String, amount: Int, userName: String) {
+        self.title = title
+        self.amount = amount
+        self.userName = userName
+    }
+    
     let id: UUID = UUID()
     let title: String
     let amount: Int
