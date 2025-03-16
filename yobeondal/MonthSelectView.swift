@@ -232,16 +232,14 @@ struct SelectedMonthView: View {
 struct TransactionEditPopup: View {
     @State private var title: String = ""  // 제목 입력
     @State private var amount: String = "" // 금액 입력
-    @StateObject var transactionViewModel: TransactionViewModel = TransactionViewModel()
+//    @StateObject var transactionViewModel: TransactionViewModel = TransactionViewModel()
     
     var body: some View {
         VStack {
             Text("Target")
             TextField("제목 입력", text: $title)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
                 .padding(.horizontal, 20)
             TextField("금액 입력", text: $amount)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
                 .keyboardType(.numberPad)
                 .padding(.horizontal, 20)
             Button(action: show) {
@@ -263,7 +261,7 @@ struct TransactionEditPopup: View {
     
     func show() {
         print("title " + title)
-        print("amount /(amount)")
+        print("amount " + amount)
     }
 }
 
