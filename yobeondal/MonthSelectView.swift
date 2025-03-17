@@ -30,6 +30,7 @@ struct MonthSelectView: View {
                                 .foregroundColor(Color(red: 243/255, green: 212/255, blue:224/255))
                                 .clipShape(RoundedRectangle(cornerRadius: 10))
                         }
+                        .buttonStyle(.plain)
                     }
                 }
                 .padding()
