@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import PopupView
 
 struct MonthSelectView: View {
     let numbers = Array(1...12)
@@ -74,14 +73,11 @@ struct SelectedMonthView: View {
             } label: {
                 Image(systemName: "plus.circle")
                     .foregroundColor(Color.black)
-                    .padding()  // 버튼 주변 여백 추가
             }
-            .popup(isPresented: $isPresented) {
-                TransactionEditPopup()
-            } customize: {
-                $0
-                    .position(.center)
-                    .animation(.spring())
+            .sheet(isPresented: $isPresented) {
+                TransactionEditPopup(isPresented: $isPresented)
+                    .presentationDragIndicator(.visible)
+                    .presentationDetents([.fraction(0.3)])
             }
         }.padding(.trailing, 25)
 
@@ -168,7 +164,6 @@ struct SelectedMonthView: View {
                     Text("Total")
                         .font(.system(size: 13))
                     Spacer()
-                        .background(Color.red)
                     Text("\(getSumOfExpenses(2))")
                         .font(.system(size: 13))
                 }
@@ -233,20 +228,23 @@ struct SelectedMonthView: View {
 struct TransactionEditPopup: View {
     @State private var title: String = ""  // 제목 입력
     @State private var amount: String = "" // 금액 입력
+    @FocusState private var isTitleFocused: Bool
+    @FocusState private var isAmountFocused: Bool
+    @Binding var isPresented: Bool
 //    @StateObject var transactionViewModel: TransactionViewModel = TransactionViewModel()
     
     var body: some View {
         VStack {
-            Text("Target")
             TextField("제목 입력", text: $title)
+                .focused($isTitleFocused)
                 .padding(.horizontal, 20)
             TextField("금액 입력", text: $amount)
+                .focused($isAmountFocused)
                 .keyboardType(.numberPad)
                 .padding(.horizontal, 20)
             Button(action: show) {
                 Text("추가하기")
                 .frame(maxWidth: .infinity)
-                .padding()
                 .background(Color.blue)
                 .foregroundColor(.white)
                 .cornerRadius(10)
@@ -257,12 +255,17 @@ struct TransactionEditPopup: View {
         .frame(width: 300, height: 200)
         .background(Color.white)
         .cornerRadius(20)
-        .shadow(radius: 10)
+        .onAppear {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                isTitleFocused = true // 자동으로 첫 번째 TextField에 포커스를 줌
+            }
+        }
     }
     
     func show() {
         print("title " + title)
         print("amount " + amount)
+        isPresented = false
     }
 }
 
