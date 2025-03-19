@@ -232,12 +232,18 @@ struct SelectedMonthView: View {
 }
 
 struct TransactionEditPopup: View {
-    @State private var title: String = ""  // 제목 입력
-    @State private var amount: String = "" // 금액 입력
+    @State private var title: String
+    @State private var amount: String
     @FocusState private var isTitleFocused: Bool
     @FocusState private var isAmountFocused: Bool
     @Binding var isPresented: Bool
 //    @StateObject var transactionViewModel: TransactionViewModel = TransactionViewModel()
+    
+    init(title: String = "", amount: String = "", isPresented: Binding<Bool>) {
+        self._title = State(initialValue: title)
+        self._amount = State(initialValue: amount)
+        self._isPresented = isPresented
+    }
     
     var body: some View {
         VStack {

@@ -8,6 +8,6 @@
 import Foundation
 
 struct Constants {
-    static let IP_ADDRESS = "ec2-54-180-24-126.ap-northeast-2.compute.amazonaws.com"
+    static let IP_ADDRESS = "ec2-43-200-164-168.ap-northeast-2.compute.amazonaws.com"
     static let PORT_NUM = "57011"
 }
