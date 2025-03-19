@@ -75,13 +75,17 @@ struct SelectedMonthView: View {
                     .resizable()
                     .foregroundColor(Color.black)
                     .frame(width: 30, height: 30)
+                    .padding(10)
+                    .contentShape(Rectangle())
             }
+            .buttonStyle(.plain)
             .sheet(isPresented: $isPresented) {
                 TransactionEditPopup(isPresented: $isPresented)
                     .presentationDragIndicator(.visible)
                     .presentationDetents([.fraction(0.3)])
             }
-        }.padding(.trailing, 25)
+            .padding(.trailing, 25)
+        }
 
         HStack {
             VStack {
@@ -250,6 +254,7 @@ struct TransactionEditPopup: View {
                 .background(Color.blue)
                 .foregroundColor(.white)
                 .cornerRadius(10)
+            
             }
             .padding(.horizontal, 20)
             
