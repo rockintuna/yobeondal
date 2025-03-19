@@ -72,7 +72,9 @@ struct SelectedMonthView: View {
                 isPresented.toggle()
             } label: {
                 Image(systemName: "plus.circle")
+                    .resizable()
                     .foregroundColor(Color.black)
+                    .frame(width: 30, height: 30)
             }
             .sheet(isPresented: $isPresented) {
                 TransactionEditPopup(isPresented: $isPresented)
