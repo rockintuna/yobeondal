@@ -99,13 +99,16 @@ struct SelectedMonthView: View {
                                     .foregroundStyle(Color.black)
                                     .font(.system(size: 13))
                             }
+                            
                             Spacer()
                             Text("\(transaction.amount)")
                                 .font(.system(size: 13))
                         } else {
                             Text("🩷 " + transaction.title)
                                 .font(.system(size: 13))
+                            
                             Spacer()
+                            
                             Text("\(transaction.amount)")
                                 .font(.system(size: 13))
                         }
@@ -118,7 +121,9 @@ struct SelectedMonthView: View {
                 HStack {
                     Text("Total")
                         .font(.system(size: 13))
+                    
                     Spacer()
+                    
                         .background(Color.red)
                     Text("\(getSumOfExpenses(1))")
                         .font(.system(size: 13))
@@ -127,8 +132,10 @@ struct SelectedMonthView: View {
                 HStack {
                     Text("비상금")
                         .font(.system(size: 13))
+                    
                     Spacer()
                         .background(Color.red)
+                    
                     Text("\(getSumOfTransactions(1))")
                         .font(.system(size: 13))
                 }
@@ -149,14 +156,18 @@ struct SelectedMonthView: View {
                             Text(transaction.title)
                                 .font(.system(size: 13))
                                 .padding(.leading, -10)
+                            
                             Spacer()
+                            
                             Text("\(transaction.amount)")
                                 .font(.system(size: 13))
                         } else {
                             Text("🩷 " + transaction.title)
                                 .font(.system(size: 13))
                                 .padding(.leading, -10)
+                            
                             Spacer()
+                            
                             Text("\(transaction.amount)")
                                 .font(.system(size: 13))
                         }
@@ -169,7 +180,9 @@ struct SelectedMonthView: View {
                 HStack {
                     Text("Total")
                         .font(.system(size: 13))
+                    
                     Spacer()
+                    
                     Text("\(getSumOfExpenses(2))")
                         .font(.system(size: 13))
                 }
@@ -177,8 +190,9 @@ struct SelectedMonthView: View {
                 HStack {
                     Text("비상금")
                         .font(.system(size: 13))
-                    Spacer()
-                        .background(Color.red)
+                    
+                    Spacer().background(Color.red)
+                    
                     Text("\(getSumOfTransactions(2))")
                         .font(.system(size: 13))
                 }
@@ -254,7 +268,7 @@ struct TransactionEditPopup: View {
                 .focused($isAmountFocused)
                 .keyboardType(.numberPad)
                 .padding(.horizontal, 20)
-            Button(action: show) {
+            Button(action: sendTransactionInfo) {
                 Text("추가하기")
                 .frame(maxWidth: .infinity)
                 .background(Color.blue)
@@ -275,7 +289,7 @@ struct TransactionEditPopup: View {
         }
     }
     
-    func show() {
+    func sendTransactionInfo() {
         print("title " + title)
         print("amount " + amount)
         isPresented = false
