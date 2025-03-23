@@ -48,13 +48,14 @@ struct SelectedMonthView: View {
     @State private var inputAmount: String = "" // 입력할 금액
     @State private var isPresented: Bool = false
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
+    @State private var selectedTitle: String = ""
+    @State private var selectedAmount: String = ""
     
     init(year: Int, month: Int) {
         self.year = year
         self.month = month
     }
     
-
     var backButton : some View {  // <-- 👀 커스텀 버튼
         Button{
             self.presentationMode.wrappedValue.dismiss()
@@ -69,6 +70,8 @@ struct SelectedMonthView: View {
         HStack {
             Spacer()
             Button {
+                selectedTitle = ""
+                selectedAmount = ""
                 isPresented.toggle()
             } label: {
                 Image(systemName: "plus.circle")
@@ -80,7 +83,10 @@ struct SelectedMonthView: View {
             }
             .buttonStyle(.plain)
             .sheet(isPresented: $isPresented) {
-                TransactionEditPopup(isPresented: $isPresented)
+                TransactionEditPopup(
+                    title: $selectedTitle,
+                    amount: $selectedAmount,
+                    isPresented: $isPresented)
                     .presentationDragIndicator(.visible)
                     .presentationDetents([.fraction(0.3)])
             }
@@ -93,6 +99,8 @@ struct SelectedMonthView: View {
                     HStack {
                         if transaction.amount >= 0 {
                             Button {
+                                selectedTitle = transaction.title
+                                selectedAmount = "\(abs(transaction.amount))"
                                 isPresented.toggle()
                             } label: {
                                 Text(transaction.title)
@@ -101,15 +109,23 @@ struct SelectedMonthView: View {
                             }
                             
                             Spacer()
-                            Text("\(transaction.amount)")
+                            
+                            Text("\(abs(transaction.amount))")
                                 .font(.system(size: 13))
                         } else {
-                            Text("🩷 " + transaction.title)
-                                .font(.system(size: 13))
+                            Button {
+                                selectedTitle = transaction.title
+                                selectedAmount = "\(abs(transaction.amount))"
+                                isPresented.toggle()
+                            } label: {
+                                Text("🩷 " + transaction.title)
+                                    .foregroundStyle(Color.black)
+                                    .font(.system(size: 13))
+                            }
                             
                             Spacer()
                             
-                            Text("\(transaction.amount)")
+                            Text("\(abs(transaction.amount))")
                                 .font(.system(size: 13))
                         }
                     }
@@ -153,22 +169,36 @@ struct SelectedMonthView: View {
                 List(getTransactions(2)) { transaction in
                     HStack {
                         if transaction.amount >= 0 {
-                            Text(transaction.title)
-                                .font(.system(size: 13))
-                                .padding(.leading, -10)
+                            Button {
+                                selectedTitle = transaction.title
+                                selectedAmount = "\(abs(transaction.amount))"
+                                isPresented.toggle()
+                            } label: {
+                                Text(transaction.title)
+                                    .foregroundStyle(Color.black)
+                                    .font(.system(size: 13))
+                                    .padding(.leading, -10)
+                            }
                             
                             Spacer()
                             
-                            Text("\(transaction.amount)")
+                            Text("\(abs(transaction.amount))")
                                 .font(.system(size: 13))
                         } else {
-                            Text("🩷 " + transaction.title)
-                                .font(.system(size: 13))
-                                .padding(.leading, -10)
+                            Button {
+                                selectedTitle = transaction.title
+                                selectedAmount = "\(abs(transaction.amount))"
+                                isPresented.toggle()
+                            } label: {
+                                Text("🩷 " + transaction.title)
+                                    .foregroundStyle(Color.black)
+                                    .font(.system(size: 13))
+                                    .padding(.leading, -10)
+                            }
                             
                             Spacer()
                             
-                            Text("\(transaction.amount)")
+                            Text("\(abs(transaction.amount))")
                                 .font(.system(size: 13))
                         }
                     }
@@ -246,40 +276,39 @@ struct SelectedMonthView: View {
 }
 
 struct TransactionEditPopup: View {
-    @State private var title: String
-    @State private var amount: String
+    @Binding var title: String
+    @Binding var amount: String
     @FocusState private var isTitleFocused: Bool
     @FocusState private var isAmountFocused: Bool
     @Binding var isPresented: Bool
 //    @StateObject var transactionViewModel: TransactionViewModel = TransactionViewModel()
-    
-    init(title: String = "", amount: String = "", isPresented: Binding<Bool>) {
-        self._title = State(initialValue: title)
-        self._amount = State(initialValue: amount)
-        self._isPresented = isPresented
-    }
     
     var body: some View {
         VStack {
             TextField("제목 입력", text: $title)
                 .focused($isTitleFocused)
                 .padding(.horizontal, 20)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(Color.gray, lineWidth: 1)
+                )
             TextField("금액 입력", text: $amount)
                 .focused($isAmountFocused)
                 .keyboardType(.numberPad)
                 .padding(.horizontal, 20)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(Color.gray, lineWidth: 1)
+                )
             Button(action: sendTransactionInfo) {
                 Text("추가하기")
                 .frame(maxWidth: .infinity)
-                .background(Color.blue)
+                .background(Color.black)
                 .foregroundColor(.white)
                 .cornerRadius(10)
-            
             }
-            .padding(.horizontal, 20)
-            
         }
-        .frame(width: 300, height: 200)
+        .frame(width: 200, height: 200)
         .background(Color.white)
         .cornerRadius(20)
         .onAppear {
