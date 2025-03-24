@@ -8,18 +8,20 @@
 import Foundation
 
 struct Transaction: Identifiable, Codable {
-    init(title: String, amount: Int, userName: String) {
+    init(id: Int, title: String, amount: Int, userName: String) {
+        self.id = id
         self.title = title
         self.amount = amount
         self.userName = userName
     }
     
-    let id: UUID = UUID()
+    let id: Int
     let title: String
     let amount: Int
     let userName: String
     
     private enum CodingKeys: String, CodingKey {
+        case id = "id"
         case title = "title"
         case amount = "amount"
         case userName = "userName"
