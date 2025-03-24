@@ -37,6 +37,7 @@ class TransactionViewModel: ObservableObject {
                 case .success(let results):
                     print("✅ Transaction upsert SUCCESS")
                     self.upsertSuccess = true
+                    self.getTransactions(year, month)
                     
                 case .failure(let error):
                     print("❌ Error: \(error.localizedDescription)")
