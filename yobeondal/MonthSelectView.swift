@@ -11,6 +11,7 @@ struct MonthSelectView: View {
     let numbers = Array(1...12)
     let columns = [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())]
     @Environment(\.presentationMode) var presentationMode
+    @StateObject var transactionViewModel = TransactionViewModel()
     
     var body: some View {
         NavigationStack {
@@ -21,7 +22,10 @@ struct MonthSelectView: View {
 
                 LazyVGrid(columns: columns, spacing: 10) {
                     ForEach(numbers, id: \.self) { number in
-                        NavigationLink(destination: SelectedMonthView(year: thisYear(), month: number)) {
+                        NavigationLink(destination: SelectedMonthView(
+                                year: thisYear(),
+                                month: number,
+                                transactionViewModel: transactionViewModel)) {
                             Text("\(number)")
                                 .font(.title)
                                 .frame(width: 80, height: 80)
@@ -42,18 +46,21 @@ struct MonthSelectView: View {
 struct SelectedMonthView: View {
     let year: Int
     let month: Int
-    @StateObject var transactionViewModel: TransactionViewModel = TransactionViewModel()
-    
+    @ObservedObject var transactionViewModel: TransactionViewModel
     @State private var inputTitle: String = "" // 입력할 제목
+    @State private var tid: Int? = nil
     @State private var inputAmount: String = "" // 입력할 금액
     @State private var isPresented: Bool = false
+    @State private var isExpenses: Bool = false
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
     @State private var selectedTitle: String = ""
-    @State private var selectedAmount: String = ""
+    @State private var selectedAmount: Int = 0
+    @State private var userId: Int = 1
     
-    init(year: Int, month: Int) {
+    init(year: Int, month: Int, transactionViewModel: TransactionViewModel) {
         self.year = year
         self.month = month
+        self.transactionViewModel = transactionViewModel
     }
     
     var backButton : some View {  // <-- 👀 커스텀 버튼
@@ -70,8 +77,11 @@ struct SelectedMonthView: View {
         HStack {
             Spacer()
             Button {
+                tid = nil
                 selectedTitle = ""
-                selectedAmount = ""
+                selectedAmount = 0
+                isExpenses = true
+                userId = 1
                 isPresented.toggle()
             } label: {
                 Image(systemName: "plus.circle")
@@ -84,11 +94,18 @@ struct SelectedMonthView: View {
             .buttonStyle(.plain)
             .sheet(isPresented: $isPresented) {
                 TransactionEditPopup(
+                    tid: tid,
+                    year: year,
+                    month: month,
                     title: $selectedTitle,
                     amount: $selectedAmount,
-                    isPresented: $isPresented)
-                    .presentationDragIndicator(.visible)
-                    .presentationDetents([.fraction(0.3)])
+                    isPresented: $isPresented,
+                    selectedUserId: $userId,
+                    isExpenses: $isExpenses,
+                    transactionViewModel: transactionViewModel
+                )
+                .presentationDragIndicator(.visible)
+                .presentationDetents([.fraction(0.3)])
             }
             .padding(.trailing, 25)
         }
@@ -99,8 +116,11 @@ struct SelectedMonthView: View {
                     HStack {
                         if transaction.amount >= 0 {
                             Button {
+                                tid = transaction.id
                                 selectedTitle = transaction.title
-                                selectedAmount = "\(abs(transaction.amount))"
+                                selectedAmount = abs(transaction.amount)
+                                userId = 1
+                                isExpenses = false
                                 isPresented.toggle()
                             } label: {
                                 Text(transaction.title)
@@ -114,8 +134,11 @@ struct SelectedMonthView: View {
                                 .font(.system(size: 13))
                         } else {
                             Button {
+                                tid = transaction.id
                                 selectedTitle = transaction.title
-                                selectedAmount = "\(abs(transaction.amount))"
+                                selectedAmount = abs(transaction.amount)
+                                userId = 1
+                                isExpenses = true
                                 isPresented.toggle()
                             } label: {
                                 Text("🩷 " + transaction.title)
@@ -170,8 +193,11 @@ struct SelectedMonthView: View {
                     HStack {
                         if transaction.amount >= 0 {
                             Button {
+                                tid = transaction.id
                                 selectedTitle = transaction.title
-                                selectedAmount = "\(abs(transaction.amount))"
+                                selectedAmount = abs(transaction.amount)
+                                userId = 2
+                                isExpenses = false
                                 isPresented.toggle()
                             } label: {
                                 Text(transaction.title)
@@ -186,8 +212,11 @@ struct SelectedMonthView: View {
                                 .font(.system(size: 13))
                         } else {
                             Button {
+                                tid = transaction.id
                                 selectedTitle = transaction.title
-                                selectedAmount = "\(abs(transaction.amount))"
+                                selectedAmount = abs(transaction.amount)
+                                userId = 2
+                                isExpenses = true
                                 isPresented.toggle()
                             } label: {
                                 Text("🩷 " + transaction.title)
@@ -276,15 +305,34 @@ struct SelectedMonthView: View {
 }
 
 struct TransactionEditPopup: View {
+    let tid: Int?
+    let year: Int
+    let month: Int
     @Binding var title: String
-    @Binding var amount: String
+    @Binding var amount: Int
     @FocusState private var isTitleFocused: Bool
     @FocusState private var isAmountFocused: Bool
     @Binding var isPresented: Bool
-//    @StateObject var transactionViewModel: TransactionViewModel = TransactionViewModel()
+    @Binding var selectedUserId: Int
+    @Binding var isExpenses: Bool
+    @ObservedObject var transactionViewModel: TransactionViewModel
     
     var body: some View {
         VStack {
+            Picker("사용자 선택", selection: $selectedUserId) {
+                            Text("수진").tag(1)
+                            Text("정인").tag(2)
+                        }
+                        .pickerStyle(.segmented)
+                        .padding(.horizontal, 20)
+            
+            Picker("수입/지출", selection: $isExpenses) {
+                            Text("수입").tag(false)
+                            Text("지출").tag(true)
+                        }
+                        .pickerStyle(.segmented)
+                        .padding(.horizontal, 20)
+            
             TextField("제목 입력", text: $title)
                 .focused($isTitleFocused)
                 .padding(.horizontal, 20)
@@ -292,7 +340,8 @@ struct TransactionEditPopup: View {
                     RoundedRectangle(cornerRadius: 8)
                         .stroke(Color.gray, lineWidth: 1)
                 )
-            TextField("금액 입력", text: $amount)
+            
+            TextField("금액 입력", value: $amount, formatter: NumberFormatter())
                 .focused($isAmountFocused)
                 .keyboardType(.numberPad)
                 .padding(.horizontal, 20)
@@ -300,6 +349,7 @@ struct TransactionEditPopup: View {
                     RoundedRectangle(cornerRadius: 8)
                         .stroke(Color.gray, lineWidth: 1)
                 )
+            
             Button(action: sendTransactionInfo) {
                 Text("추가하기")
                 .frame(maxWidth: .infinity)
@@ -319,8 +369,13 @@ struct TransactionEditPopup: View {
     }
     
     func sendTransactionInfo() {
-        print("title " + title)
-        print("amount " + amount)
+        var integer: Int
+        if isExpenses {
+            integer = -amount
+        } else {
+            integer = amount
+        }
+        transactionViewModel.upsertTransactions(tid, year, month, title, integer, selectedUserId)
         isPresented = false
     }
 }
