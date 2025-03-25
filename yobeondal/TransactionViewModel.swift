@@ -11,7 +11,7 @@ import SwiftUI
 class TransactionViewModel: ObservableObject {
     
     @Published var response: [Transaction] = []
-    @Published var upsertSuccess: Bool? = nil
+    @Published var success: Bool? = nil
     var httpClient = HTTPClient()
     
     func getTransactions(_ year: Int,_ month: Int) {
@@ -36,12 +36,29 @@ class TransactionViewModel: ObservableObject {
                 switch result {
                 case .success(let results):
                     print("✅ Transaction upsert SUCCESS")
-                    self.upsertSuccess = true
+                    self.success = true
                     self.getTransactions(year, month)
                     
                 case .failure(let error):
                     print("❌ Error: \(error.localizedDescription)")
-                    self.upsertSuccess = false
+                    self.success = false
+                }
+            }
+        }
+    }
+    
+    func deleteTransactions(_ tid: Int, _ year: Int,_ month: Int) {
+        httpClient.deleteTransactions(tid) { result in
+            DispatchQueue.main.async { // ✅ 모든 결과 처리를 메인 스레드에서 실행
+                switch result {
+                case .success(let results):
+                    print("✅ Transaction delete SUCCESS")
+                    self.success = true
+                    self.getTransactions(year, month)
+                    
+                case .failure(let error):
+                    print("❌ Error: \(error.localizedDescription)")
+                    self.success = false
                 }
             }
         }
