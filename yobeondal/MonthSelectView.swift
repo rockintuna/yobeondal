@@ -54,7 +54,7 @@ struct SelectedMonthView: View {
     @State private var isExpenses: Bool = false
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
     @State private var selectedTitle: String = ""
-    @State private var selectedAmount: Int = 0
+    @State private var selectedAmount: Int?
     @State private var userId: Int = 1
     
     init(year: Int, month: Int, transactionViewModel: TransactionViewModel) {
@@ -79,7 +79,7 @@ struct SelectedMonthView: View {
             Button {
                 tid = nil
                 selectedTitle = ""
-                selectedAmount = 0
+                selectedAmount = nil
                 isExpenses = true
                 userId = 1
                 isPresented.toggle()
@@ -88,13 +88,13 @@ struct SelectedMonthView: View {
                     .resizable()
                     .foregroundColor(Color.black)
                     .frame(width: 30, height: 30)
-                    .padding(10)
+                    .padding(20)
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
             .sheet(isPresented: $isPresented) {
                 TransactionEditPopup(
-                    tid: tid,
+                    tid: $tid,
                     year: year,
                     month: month,
                     title: $selectedTitle,
@@ -104,10 +104,15 @@ struct SelectedMonthView: View {
                     isExpenses: $isExpenses,
                     transactionViewModel: transactionViewModel
                 )
+                .onAppear {
+                    DispatchQueue.main.async {
+                        isPresented = true
+                    }
+                }
                 .presentationDragIndicator(.visible)
-                .presentationDetents([.fraction(0.3)])
+                .presentationDetents([.fraction(0.5)])
             }
-            .padding(.trailing, 25)
+            .animation(.easeInOut(duration: 0.1), value: isPresented)
         }
 
         HStack {
@@ -305,11 +310,11 @@ struct SelectedMonthView: View {
 }
 
 struct TransactionEditPopup: View {
-    let tid: Int?
+    @Binding var tid: Int?
     let year: Int
     let month: Int
     @Binding var title: String
-    @Binding var amount: Int
+    @Binding var amount: Int?
     @FocusState private var isTitleFocused: Bool
     @FocusState private var isAmountFocused: Bool
     @Binding var isPresented: Bool
@@ -351,31 +356,51 @@ struct TransactionEditPopup: View {
                 )
             
             Button(action: sendTransactionInfo) {
-                Text("추가하기")
-                .frame(maxWidth: .infinity)
+                Text(tid == nil ? "추가하기" : "변경하기")
+                    .frame(width: 100, height: 25)
                 .background(Color.black)
                 .foregroundColor(.white)
                 .cornerRadius(10)
             }
+            .buttonStyle(.plain)
+            
+            if tid != nil {
+                Button(action: deleteTransaction) {
+                    Text("삭제하기")
+                    .frame(width: 100, height: 25)
+                    .background(Color.gray)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+                }
+                .buttonStyle(.plain)
+            }
         }
-        .frame(width: 200, height: 200)
+        .frame(width: 250, height: 300)
         .background(Color.white)
         .cornerRadius(20)
         .onAppear {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                isTitleFocused = true // 자동으로 첫 번째 TextField에 포커스를 줌
-            }
+//            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+//                isTitleFocused = true // 자동으로 첫 번째 TextField에 포커스를 줌
+//            }
+//            DispatchQueue.main.async {
+//                isTitleFocused = true
+//            }
         }
     }
     
     func sendTransactionInfo() {
         var integer: Int
         if isExpenses {
-            integer = -amount
+            integer = -amount!
         } else {
-            integer = amount
+            integer = amount!
         }
         transactionViewModel.upsertTransactions(tid, year, month, title, integer, selectedUserId)
+        isPresented = false
+    }
+    
+    func deleteTransaction() {
+        transactionViewModel.deleteTransactions(tid!, year, month)
         isPresented = false
     }
 }
