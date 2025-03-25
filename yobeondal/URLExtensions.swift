@@ -16,4 +16,12 @@ extension URL {
     static func postTransactionsUrl() -> URL? {
         return URL(string: "http://\(Constants.IP_ADDRESS):\(Constants.PORT_NUM)/api/transactions")
     }
+    
+    static func patchTransactionsUrl(_ id: Int) -> URL? {
+        return URL(string: "http://\(Constants.IP_ADDRESS):\(Constants.PORT_NUM)/api/transactions/\(id)")
+    }
+    
+    static func deleteTransactionsUrl(_ id: Int) -> URL? {
+        return URL(string: "http://\(Constants.IP_ADDRESS):\(Constants.PORT_NUM)/api/transactions/\(id)")
+    }
 }
