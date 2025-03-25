@@ -36,17 +36,59 @@ class HTTPClient {
     }
     
     func upsertTransactions(_ tid: Int?, _ year: Int,_ month: Int,_ title: String,_ amount: Int,_ userId: Int, completion: @escaping (Result<String, NetworkError>) -> Void) {
-        guard let url = URL.postTransactionsUrl() else {
+        
+        if tid == nil {
+            guard let url = URL.postTransactionsUrl() else {
+                return completion(.failure(.badURL))
+            }
+            
+            let transactionData: [String: Any] = ["title" : title, "amount" : amount, "userId" : userId, "year" : year, "month" : month]
+            guard let jsonData = try? JSONSerialization.data(withJSONObject: transactionData) else { return }
+            
+            var request = URLRequest(url: url)
+            request.httpMethod = "POST"
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.httpBody = jsonData
+        
+            URLSession.shared.dataTask(with: request) { data, response, error in
+                guard error == nil else {
+                    return completion(.failure(.noData))
+                }
+                
+                completion(.success("OK"))
+                
+            }.resume()
+        } else {
+            guard let url = URL.patchTransactionsUrl(tid!) else {
+                return completion(.failure(.badURL))
+            }
+            
+            let transactionData: [String: Any] = ["title" : title, "amount" : amount, "userId" : userId, "year" : year, "month" : month]
+            guard let jsonData = try? JSONSerialization.data(withJSONObject: transactionData) else { return }
+            
+            var request = URLRequest(url: url)
+            request.httpMethod = "PATCH"
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.httpBody = jsonData
+        
+            URLSession.shared.dataTask(with: request) { data, response, error in
+                guard error == nil else {
+                    return completion(.failure(.noData))
+                }
+                
+                completion(.success("OK"))
+                
+            }.resume()
+        }
+    }
+    
+    func deleteTransactions(_ tid: Int, completion: @escaping (Result<String, NetworkError>) -> Void) {
+        guard let url = URL.deleteTransactionsUrl(tid) else {
             return completion(.failure(.badURL))
         }
         
-        let transactionData: [String: Any] = ["title" : title, "amount" : amount, "userId" : userId, "year" : year, "month" : month]
-        guard let jsonData = try? JSONSerialization.data(withJSONObject: transactionData) else { return }
-        
         var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.httpBody = jsonData
+        request.httpMethod = "DELETE"
     
         URLSession.shared.dataTask(with: request) { data, response, error in
             guard error == nil else {
