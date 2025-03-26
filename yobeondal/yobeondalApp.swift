@@ -16,7 +16,7 @@ struct yobeondalApp: App {
             if isLoading {
                 LoadingView()
                     .onAppear {
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
                             isLoading = false
                         }
                     }
