@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import PopupView
 
 struct MonthSelectView: View {
     let numbers = Array(1...12)
@@ -46,11 +47,13 @@ struct MonthSelectView: View {
 struct SelectedMonthView: View {
     let year: Int
     let month: Int
+    let buttonColor: Color = Color(red: 36/255, green: 36/255, blue: 36/255)
     @ObservedObject var transactionViewModel: TransactionViewModel
     @State private var inputTitle: String = "" // 입력할 제목
     @State private var tid: Int? = nil
     @State private var inputAmount: String = "" // 입력할 금액
-    @State private var isPresented: Bool = false
+    @State private var viewUpdateSheet: Bool = false
+    @State private var viewLoadLastMonthPopup: Bool = false
     @State private var isExpenses: Bool = false
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
     @State private var selectedTitle: String = ""
@@ -75,44 +78,85 @@ struct SelectedMonthView: View {
     
     var body: some View {
         HStack {
+            Button {
+                viewLoadLastMonthPopup.toggle()
+            } label: {
+                Image(systemName: "arrow.trianglehead.clockwise.heart")
+                    .resizable()
+                    .foregroundColor(buttonColor)
+                    .frame(width: 25, height: 25)
+                    .padding(25)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .popup(isPresented: $viewLoadLastMonthPopup) {
+                VStack {
+                    Text("지난 달 데이터를 불러옵니다.")
+                        .bold()
+                        .padding(20)
+                        .foregroundStyle(buttonColor)
+                    Button {
+                        print("test")
+                    } label: {
+                        Text("OK")
+                            .padding(10)
+                            .foregroundColor(.white)
+                            .background(buttonColor)
+                            .cornerRadius(10)
+                    }
+                    .buttonStyle(.plain)
+                }
+                .padding()
+                .background(Color.white)
+                .cornerRadius(20)
+                .shadow(radius: 5)
+            } customize: {
+                $0
+                    .position(.center)
+                    .animation(.spring())
+                    .closeOnTapOutside(true)
+                    .backgroundColor(.black.opacity(0.5))
+            }
+            
             Spacer()
+            
             Button {
                 tid = nil
                 selectedTitle = ""
                 selectedAmount = nil
                 isExpenses = true
                 userId = 1
-                isPresented.toggle()
+                viewUpdateSheet.toggle()
             } label: {
-                Image(systemName: "plus.circle")
+                Image(systemName: "arrow.up.heart")
                     .resizable()
-                    .foregroundColor(Color.black)
-                    .frame(width: 30, height: 30)
-                    .padding(20)
+                    .foregroundColor(buttonColor)
+                    .frame(width: 25, height: 25)
+                    .padding(25)
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .sheet(isPresented: $isPresented) {
+            .sheet(isPresented: $viewUpdateSheet) {
                 TransactionEditPopup(
                     tid: $tid,
                     year: year,
                     month: month,
                     title: $selectedTitle,
                     amount: $selectedAmount,
-                    isPresented: $isPresented,
+                    isPresented: $viewUpdateSheet,
                     selectedUserId: $userId,
                     isExpenses: $isExpenses,
                     transactionViewModel: transactionViewModel
                 )
                 .onAppear {
                     DispatchQueue.main.async {
-                        isPresented = true
+                        viewUpdateSheet = true
                     }
                 }
                 .presentationDragIndicator(.visible)
                 .presentationDetents([.fraction(0.5)])
             }
-            .animation(.easeInOut(duration: 0.1), value: isPresented)
+            .animation(.easeInOut(duration: 0.1), value: viewUpdateSheet)
         }
 
         HStack {
@@ -126,7 +170,7 @@ struct SelectedMonthView: View {
                                 selectedAmount = abs(transaction.amount)
                                 userId = 1
                                 isExpenses = false
-                                isPresented.toggle()
+                                viewUpdateSheet.toggle()
                             } label: {
                                 Text(transaction.title)
                                     .foregroundStyle(Color.black)
@@ -144,7 +188,7 @@ struct SelectedMonthView: View {
                                 selectedAmount = abs(transaction.amount)
                                 userId = 1
                                 isExpenses = true
-                                isPresented.toggle()
+                                viewUpdateSheet.toggle()
                             } label: {
                                 Text("🩷 " + transaction.title)
                                     .foregroundStyle(Color.black)
@@ -203,7 +247,7 @@ struct SelectedMonthView: View {
                                 selectedAmount = abs(transaction.amount)
                                 userId = 2
                                 isExpenses = false
-                                isPresented.toggle()
+                                viewUpdateSheet.toggle()
                             } label: {
                                 Text(transaction.title)
                                     .foregroundStyle(Color.black)
@@ -222,7 +266,7 @@ struct SelectedMonthView: View {
                                 selectedAmount = abs(transaction.amount)
                                 userId = 2
                                 isExpenses = true
-                                isPresented.toggle()
+                                viewUpdateSheet.toggle()
                             } label: {
                                 Text("🩷 " + transaction.title)
                                     .foregroundStyle(Color.black)
@@ -355,24 +399,39 @@ struct TransactionEditPopup: View {
                         .stroke(Color.gray, lineWidth: 1)
                 )
             
-            Button(action: sendTransactionInfo) {
-                Text(tid == nil ? "추가하기" : "변경하기")
-                    .frame(width: 100, height: 25)
-                .background(Color.black)
-                .foregroundColor(.white)
-                .cornerRadius(10)
-            }
-            .buttonStyle(.plain)
-            
-            if tid != nil {
-                Button(action: deleteTransaction) {
-                    Text("삭제하기")
-                    .frame(width: 100, height: 25)
-                    .background(Color.gray)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
+            HStack {
+                Button(action: sendTransactionInfo) {
+//                    Text(tid == nil ? "추가하기" : "변경하기")
+//                        .frame(width: 100, height: 25)
+//                    .background(Color.black)
+//                    .foregroundColor(.white)
+//                    .cornerRadius(10)
+                    Image(systemName: "square.and.arrow.up")
+                        .resizable()
+                        .foregroundColor(Color.primary)
+                        .frame(width: 30, height: 30)
+                        .padding(20)
+                        .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
+                
+                if tid != nil {
+                    Spacer()
+                    Button(action: deleteTransaction) {
+//                        Text("삭제하기")
+//                        .frame(width: 100, height: 25)
+//                        .background(Color.gray)
+//                        .foregroundColor(.white)
+//                        .cornerRadius(10)
+                        Image(systemName: "trash")
+                            .resizable()
+                            .foregroundColor(Color.gray)
+                            .frame(width: 30, height: 30)
+                            .padding(20)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                }
             }
         }
         .frame(width: 250, height: 300)
