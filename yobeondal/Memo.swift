@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Message: Identifiable, Codable {
+struct Memo: Identifiable, Codable {
     init(id: Int, content: String, userName: String) {
         self.id = id
         self.content = content
