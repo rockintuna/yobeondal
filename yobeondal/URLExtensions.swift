@@ -24,4 +24,12 @@ extension URL {
     static func deleteTransactionsUrl(_ id: Int) -> URL? {
         return URL(string: "http://\(Constants.IP_ADDRESS):\(Constants.PORT_NUM)/api/transactions/\(id)")
     }
+    
+    static func getMemosUrl(_ year: Int, _ month: Int) -> URL? {
+        return URL(string: "http://\(Constants.IP_ADDRESS):\(Constants.PORT_NUM)/api/memos?year=\(year)&month=\(month)")
+    }
+    
+    static func postMemosUrl() -> URL? {
+        return URL(string: "http://\(Constants.IP_ADDRESS):\(Constants.PORT_NUM)/api/memos")
+    }
 }
