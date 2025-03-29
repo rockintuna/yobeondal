@@ -54,6 +54,7 @@ struct SelectedMonthView: View {
     @State private var inputAmount: String = "" // 입력할 금액
     @State private var viewUpdateSheet: Bool = false
     @State private var viewLoadLastMonthPopup: Bool = false
+    @State private var viewMessagePopup: Bool = false
     @State private var isExpenses: Bool = false
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
     @State private var selectedTitle: String = ""
@@ -110,6 +111,29 @@ struct SelectedMonthView: View {
                 .background(Color.white)
                 .cornerRadius(20)
                 .shadow(radius: 5)
+            } customize: {
+                $0
+                    .position(.center)
+                    .animation(.spring())
+                    .closeOnTapOutside(true)
+                    .backgroundColor(.black.opacity(0.5))
+            }
+            
+            Spacer()
+            
+            Button {
+                viewMessagePopup.toggle()
+            } label: {
+                Image(systemName: "message")
+                    .resizable()
+                    .foregroundColor(buttonColor)
+                    .frame(width: 25, height: 25)
+                    .padding(25)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .popup(isPresented: $viewMessagePopup) {
+                Text("메시지")
             } customize: {
                 $0
                     .position(.center)
