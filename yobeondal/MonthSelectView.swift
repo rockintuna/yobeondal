@@ -79,6 +79,8 @@ struct SelectedMonthView: View {
     
     var body: some View {
         HStack {
+            Spacer()
+            
             Button {
                 viewLoadLastMonthPopup.toggle()
             } label: {
@@ -119,7 +121,7 @@ struct SelectedMonthView: View {
                     .backgroundColor(.black.opacity(0.5))
             }
             
-            Spacer()
+            Spacer(minLength: 55)
             
             Button {
                 viewMessagePopup.toggle()
@@ -142,7 +144,7 @@ struct SelectedMonthView: View {
                     .backgroundColor(.black.opacity(0.5))
             }
             
-            Spacer()
+            Spacer(minLength: 55)
             
             Button {
                 tid = nil
@@ -181,6 +183,8 @@ struct SelectedMonthView: View {
                 .presentationDetents([.fraction(0.5)])
             }
             .animation(.easeInOut(duration: 0.1), value: viewUpdateSheet)
+            
+            Spacer()
         }
 
         HStack {
