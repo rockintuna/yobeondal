@@ -13,6 +13,7 @@ struct MonthSelectView: View {
     let columns = [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())]
     @Environment(\.presentationMode) var presentationMode
     @StateObject var transactionViewModel = TransactionViewModel()
+    @StateObject var memoViewModel = MemoViewModel()
     
     var body: some View {
         NavigationStack {
@@ -26,7 +27,8 @@ struct MonthSelectView: View {
                         NavigationLink(destination: SelectedMonthView(
                                 year: thisYear(),
                                 month: number,
-                                transactionViewModel: transactionViewModel)) {
+                                transactionViewModel: transactionViewModel,
+                                memoViewModel: memoViewModel)) {
                             Text("\(number)")
                                 .font(.title)
                                 .frame(width: 80, height: 80)
@@ -49,22 +51,24 @@ struct SelectedMonthView: View {
     let month: Int
     let buttonColor: Color = Color(red: 36/255, green: 36/255, blue: 36/255)
     @ObservedObject var transactionViewModel: TransactionViewModel
+    @ObservedObject var memoViewModel: MemoViewModel
     @State private var inputTitle: String = "" // 입력할 제목
     @State private var tid: Int? = nil
     @State private var inputAmount: String = "" // 입력할 금액
     @State private var viewUpdateSheet: Bool = false
     @State private var viewLoadLastMonthPopup: Bool = false
-    @State private var viewMessagePopup: Bool = false
+    @State private var viewMemoPopup: Bool = false
     @State private var isExpenses: Bool = false
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
     @State private var selectedTitle: String = ""
     @State private var selectedAmount: Int?
     @State private var userId: Int = 1
     
-    init(year: Int, month: Int, transactionViewModel: TransactionViewModel) {
+    init(year: Int, month: Int, transactionViewModel: TransactionViewModel, memoViewModel: MemoViewModel) {
         self.year = year
         self.month = month
         self.transactionViewModel = transactionViewModel
+        self.memoViewModel = memoViewModel
     }
     
     var backButton : some View {  // <-- 👀 커스텀 버튼
@@ -124,7 +128,7 @@ struct SelectedMonthView: View {
             Spacer(minLength: 55)
             
             Button {
-                viewMessagePopup.toggle()
+                viewMemoPopup.toggle()
             } label: {
                 Image(systemName: "message")
                     .resizable()
@@ -134,15 +138,22 @@ struct SelectedMonthView: View {
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .popup(isPresented: $viewMessagePopup) {
-                Text("메시지")
-            } customize: {
-                $0
-                    .position(.center)
-                    .animation(.spring())
-                    .closeOnTapOutside(true)
-                    .backgroundColor(.black.opacity(0.5))
+            .sheet(isPresented: $viewMemoPopup) {
+                MemoPopup(
+                    year: year,
+                    month: month,
+                    memoViewModel: memoViewModel
+                )
+                .onAppear {
+                    DispatchQueue.main.async {
+                        memoViewModel.getMemos(year, month)
+                        viewMemoPopup = true
+                    }
+                }
+                .presentationDragIndicator(.visible)
+                .presentationDetents([.fraction(0.5)])
             }
+            .animation(.easeInOut(duration: 0.1), value: viewUpdateSheet)
             
             Spacer(minLength: 55)
             
@@ -489,6 +500,86 @@ struct TransactionEditPopup: View {
     func deleteTransaction() {
         transactionViewModel.deleteTransactions(tid!, year, month)
         isPresented = false
+    }
+}
+
+struct MemoPopup: View {
+    let year: Int
+    let month: Int
+    @State private var newMessage: String = ""
+    @ObservedObject var memoViewModel: MemoViewModel = MemoViewModel()
+    @FocusState private var isTextFieldFocused: Bool
+    
+    init(year: Int, month: Int, memoViewModel: MemoViewModel) {
+        self.year = year
+        self.month = month
+        self.memoViewModel = memoViewModel
+    }
+    
+    var body: some View {
+        VStack {
+            Spacer()
+            
+            ScrollViewReader { proxy in
+                List(memoViewModel.response) { memo in
+                    Text(memo.content)
+                        .padding(10)
+                        .background(Color.gray.opacity(0.2))
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                        .listRowSeparator(.hidden)
+                }
+                .listStyle(PlainListStyle())
+                .onAppear() {
+                    scrollToBottom(proxy: proxy)
+                }
+                .onChange(of: memoViewModel.response.count) { _ in
+                    scrollToBottom(proxy: proxy)
+                }
+            }
+            
+            Spacer()
+            
+            // 입력창
+            HStack {
+                TextField("메시지를 입력하세요...", text: $newMessage)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .padding(.leading, 10)
+                    .focused($isTextFieldFocused)
+                
+                
+                Button(action: sendMessage) {
+                    Image(systemName: "paperplane.fill")
+                        .foregroundColor(.white)
+                        .padding()
+                        .background(Color.blue)
+                        .clipShape(Circle())
+                }
+                .buttonStyle(.plain)
+                .padding(.trailing, 10)
+            }
+            .padding(.vertical, 10)
+            .background(Color(.systemGray6)) // 입력창 배경
+            .onTapGesture {
+                isTextFieldFocused = true // 클릭 시 키보드 표시
+            }
+        }
+    }
+    
+    // 자동 스크롤 함수
+    private func scrollToBottom(proxy: ScrollViewProxy) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            if let lastMessage = memoViewModel.response.last {
+                withAnimation {
+                    proxy.scrollTo(lastMessage.id, anchor: .bottom)
+                }
+            }
+        }
+    }
+    
+    func sendMessage() {
+        guard !newMessage.isEmpty else { return }
+        
+        print(newMessage)
     }
 }
 
