@@ -529,6 +529,13 @@ struct MemoPopup: View {
                         .background(Color.gray.opacity(0.2))
                         .clipShape(RoundedRectangle(cornerRadius: 10))
                         .listRowSeparator(.hidden)
+                        .contextMenu{
+                            Button(role: .destructive) {
+                                deleteMemo()
+                            } label: {
+                                Label("삭제", systemImage: "trash")
+                            }
+                        }
                 }
                 .listStyle(PlainListStyle())
                 .onAppear() {
@@ -548,7 +555,7 @@ struct MemoPopup: View {
                     .padding(.leading, 10)
                     .focused($isTextFieldFocused)
                 
-                Button(action: sendMessage) {
+                Button(action: sendMemo) {
                     Image(systemName: "paperplane.fill")
                         .foregroundColor(.white)
                         .padding()
@@ -580,12 +587,16 @@ struct MemoPopup: View {
         }
     }
     
-    func sendMessage() {
+    func sendMemo() {
         guard !content.isEmpty else { return }
         
         memoViewModel.createMemo(year, month, content, 1)
         
         content = ""
+    }
+    
+    func deleteMemo() {
+        print("메시지 삭제")
     }
 }
 
