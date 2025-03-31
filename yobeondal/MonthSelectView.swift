@@ -7,6 +7,7 @@
 
 import SwiftUI
 import PopupView
+import Combine
 
 struct MonthSelectView: View {
     let numbers = Array(1...12)
@@ -151,7 +152,7 @@ struct SelectedMonthView: View {
                     }
                 }
                 .presentationDragIndicator(.visible)
-                .presentationDetents([.fraction(0.5)])
+                .presentationDetents([.fraction(0.4)])
             }
             .animation(.easeInOut(duration: 0.1), value: viewUpdateSheet)
             
@@ -506,9 +507,10 @@ struct TransactionEditPopup: View {
 struct MemoPopup: View {
     let year: Int
     let month: Int
-    @State private var newMessage: String = ""
+    @State private var content: String = ""
     @ObservedObject var memoViewModel: MemoViewModel = MemoViewModel()
     @FocusState private var isTextFieldFocused: Bool
+    @StateObject private var keyboardResponder = KeyboardResponder()
     
     init(year: Int, month: Int, memoViewModel: MemoViewModel) {
         self.year = year
@@ -541,11 +543,10 @@ struct MemoPopup: View {
             
             // 입력창
             HStack {
-                TextField("메시지를 입력하세요...", text: $newMessage)
+                TextField("메시지를 입력하세요...", text: $content)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding(.leading, 10)
                     .focused($isTextFieldFocused)
-                
                 
                 Button(action: sendMessage) {
                     Image(systemName: "paperplane.fill")
@@ -562,7 +563,10 @@ struct MemoPopup: View {
             .onTapGesture {
                 isTextFieldFocused = true // 클릭 시 키보드 표시
             }
+            .padding(.bottom, keyboardResponder.keyboardHeight) // ✅ 키보드 높이만큼
+            .animation(.easeOut(duration: 0.3), value: keyboardResponder.keyboardHeight)
         }
+        .edgesIgnoringSafeArea(.bottom)
     }
     
     // 자동 스크롤 함수
@@ -577,9 +581,30 @@ struct MemoPopup: View {
     }
     
     func sendMessage() {
-        guard !newMessage.isEmpty else { return }
+        guard !content.isEmpty else { return }
         
-        print(newMessage)
+        memoViewModel.createMemo(year, month, content, 1)
+        
+        content = ""
+    }
+}
+
+// ✅ 키보드 감지 클래스
+class KeyboardResponder: ObservableObject {
+    @Published var keyboardHeight: CGFloat = 0
+    private var cancellables = Set<AnyCancellable>()
+    
+    init() {
+        let willShow = NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)
+        let willHide = NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)
+        
+        willShow.merge(with: willHide)
+            .sink { notification in
+                if let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
+                    self.keyboardHeight = notification.name == UIResponder.keyboardWillShowNotification ? keyboardFrame.height : 0
+                }
+            }
+            .store(in: &cancellables)
     }
 }
 

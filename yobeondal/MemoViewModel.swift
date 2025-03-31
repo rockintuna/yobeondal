@@ -31,7 +31,7 @@ class MemoViewModel: ObservableObject {
         }
     }
     
-    func createMemo(_ tid: Int?, _ year: Int,_ month: Int,_ content: String,_ userId: Int) {
+    func createMemo(_ year: Int,_ month: Int,_ content: String,_ userId: Int) {
         httpClient.createMemo(year, month, content, userId) { result in
             DispatchQueue.main.async { // ✅ 모든 결과 처리를 메인 스레드에서 실행
                 switch result {
