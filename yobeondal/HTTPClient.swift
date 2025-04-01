@@ -142,4 +142,23 @@ class HTTPClient {
             
         }.resume()
     }
+    
+    func deleteMemo(_ id: Int, completion: @escaping (Result<String, NetworkError>) -> Void) {
+        
+        guard let url = URL.deleteMemosUrl(id) else {
+            return completion(.failure(.badURL))
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "DELETE"
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            guard error == nil else {
+                return completion(.failure(.noData))
+            }
+            
+            completion(.success("OK"))
+            
+        }.resume()
+    }
 }

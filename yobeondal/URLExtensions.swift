@@ -32,4 +32,8 @@ extension URL {
     static func postMemosUrl() -> URL? {
         return URL(string: "http://\(Constants.IP_ADDRESS):\(Constants.PORT_NUM)/api/memos")
     }
+    
+    static func deleteMemosUrl(_ id: Int) -> URL? {
+        return URL(string: "http://\(Constants.IP_ADDRESS):\(Constants.PORT_NUM)/api/memos/\(id)")
+    }
 }

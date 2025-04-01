@@ -47,4 +47,21 @@ class MemoViewModel: ObservableObject {
             }
         }
     }
+    
+    func deleteMemo(_ id: Int,_ year: Int,_ month: Int) {
+        httpClient.deleteMemo(id) { result in
+            DispatchQueue.main.async { // ✅ 모든 결과 처리를 메인 스레드에서 실행
+                switch result {
+                case .success(let results):
+                    print("✅ Memo delete SUCCESS")
+                    self.success = true
+                    self.getMemos(year, month)
+                    
+                case .failure(let error):
+                    print("❌ Error: \(error.localizedDescription)")
+                    self.success = false
+                }
+            }
+        }
+    }
 }
