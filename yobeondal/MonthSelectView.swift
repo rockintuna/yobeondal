@@ -531,7 +531,7 @@ struct MemoPopup: View {
                         .listRowSeparator(.hidden)
                         .contextMenu{
                             Button(role: .destructive) {
-                                deleteMemo()
+                                deleteMemo(memo.id, year, month)
                             } label: {
                                 Label("삭제", systemImage: "trash")
                             }
@@ -595,8 +595,8 @@ struct MemoPopup: View {
         content = ""
     }
     
-    func deleteMemo() {
-        print("메시지 삭제")
+    func deleteMemo(_ id: Int,_ year: Int,_ month: Int) {
+        memoViewModel.deleteMemo(id, year, month)
     }
 }
 
