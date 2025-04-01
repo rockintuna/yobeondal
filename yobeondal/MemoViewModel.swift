@@ -17,15 +17,15 @@ class MemoViewModel: ObservableObject {
     
     func getMemos(_ year: Int,_ month: Int) {
         httpClient.getMemos(year, month) { result in
-            DispatchQueue.main.async { // ✅ 모든 결과 처리를 메인 스레드에서 실행
+            DispatchQueue.main.async {
                 switch result {
                 case .success(let results):
-                    print("✅ HTTP GET MEMO SUCCESS")
+                    print("HTTP GET MEMO SUCCESS")
                     self.response = results
                     
                 case .failure(let error):
-                    print("❌ Error: \(error.localizedDescription)")
-                    self.response = [] // 🚨 실패 시 UI 업데이트가 필요하다면 이렇게 할 수도 있음
+                    print("HTTP Error: \(error.localizedDescription)")
+                    self.response = []
                 }
             }
         }
@@ -33,15 +33,15 @@ class MemoViewModel: ObservableObject {
     
     func createMemo(_ year: Int,_ month: Int,_ content: String,_ userId: Int) {
         httpClient.createMemo(year, month, content, userId) { result in
-            DispatchQueue.main.async { // ✅ 모든 결과 처리를 메인 스레드에서 실행
+            DispatchQueue.main.async {
                 switch result {
                 case .success(let results):
-                    print("✅ Memo create SUCCESS")
+                    print("HTTP Memo create SUCCESS")
                     self.success = true
                     self.getMemos(year, month)
                     
                 case .failure(let error):
-                    print("❌ Error: \(error.localizedDescription)")
+                    print("HTTP Error: \(error.localizedDescription)")
                     self.success = false
                 }
             }
@@ -50,15 +50,15 @@ class MemoViewModel: ObservableObject {
     
     func deleteMemo(_ id: Int,_ year: Int,_ month: Int) {
         httpClient.deleteMemo(id) { result in
-            DispatchQueue.main.async { // ✅ 모든 결과 처리를 메인 스레드에서 실행
+            DispatchQueue.main.async {
                 switch result {
                 case .success(let results):
-                    print("✅ Memo delete SUCCESS")
+                    print("HTTP Memo delete SUCCESS")
                     self.success = true
                     self.getMemos(year, month)
                     
                 case .failure(let error):
-                    print("❌ Error: \(error.localizedDescription)")
+                    print("HTTP Error: \(error.localizedDescription)")
                     self.success = false
                 }
             }

@@ -46,7 +46,6 @@ struct MonthSelectView: View {
     }
 }
 
-// 선택된 숫자 화면
 struct SelectedMonthView: View {
     let year: Int
     let month: Int
@@ -369,26 +368,26 @@ struct SelectedMonthView: View {
     func getSumOfTransactions(_ userId: Int) -> Int {
         if userId == 1 {
             return self.transactionViewModel.transactionsForSJ
-                .map { $0.amount }  // 모든 amount 값 가져오기
-                .reduce(0, +)       // 합산
+                .map { $0.amount }
+                .reduce(0, +)
         } else {
             return self.transactionViewModel.transactionsForJI
-                .map { $0.amount }  // 모든 amount 값 가져오기
-                .reduce(0, +)       // 합산
+                .map { $0.amount }
+                .reduce(0, +)
         }
     }
     
     func getSumOfExpenses(_ userId: Int) -> Int {
         if userId == 1 {
             return self.transactionViewModel.transactionsForSJ
-                .filter { $0.amount < 0 }  // 음수인 값만 필터링
-                .map { abs($0.amount) }    // 절대값 변환
-                .reduce(0, +)              // 합산
+                .filter { $0.amount < 0 }
+                .map { abs($0.amount) }
+                .reduce(0, +)
         } else {
             return self.transactionViewModel.transactionsForJI
-                .filter { $0.amount < 0 }  // 음수인 값만 필터링
-                .map { abs($0.amount) }    // 절대값 변환
-                .reduce(0, +)              // 합산
+                .filter { $0.amount < 0 }
+                .map { abs($0.amount) }
+                .reduce(0, +)
         }
     }
     
@@ -445,11 +444,6 @@ struct TransactionEditPopup: View {
             
             HStack {
                 Button(action: sendTransactionInfo) {
-//                    Text(tid == nil ? "추가하기" : "변경하기")
-//                        .frame(width: 100, height: 25)
-//                    .background(Color.black)
-//                    .foregroundColor(.white)
-//                    .cornerRadius(10)
                     Image(systemName: "square.and.arrow.up")
                         .resizable()
                         .foregroundColor(Color.primary)
@@ -482,12 +476,6 @@ struct TransactionEditPopup: View {
         .background(Color.white)
         .cornerRadius(20)
         .onAppear {
-//            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-//                isTitleFocused = true // 자동으로 첫 번째 TextField에 포커스를 줌
-//            }
-//            DispatchQueue.main.async {
-//                isTitleFocused = true
-//            }
         }
     }
     
@@ -552,7 +540,6 @@ struct MemoPopup: View {
             
             Spacer()
             
-            // 입력창
             HStack {
                 TextField("메시지를 입력하세요...", text: $content)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
@@ -570,17 +557,16 @@ struct MemoPopup: View {
                 .padding(.trailing, 10)
             }
             .padding(.vertical, 10)
-            .background(Color(.systemGray6)) // 입력창 배경
+            .background(Color(.systemGray6))
             .onTapGesture {
-                isTextFieldFocused = true // 클릭 시 키보드 표시
+                isTextFieldFocused = true
             }
-            .padding(.bottom, keyboardResponder.keyboardHeight) // ✅ 키보드 높이만큼
+            .padding(.bottom, keyboardResponder.keyboardHeight)
             .animation(.easeOut(duration: 0.3), value: keyboardResponder.keyboardHeight)
         }
         .edgesIgnoringSafeArea(.bottom)
     }
     
-    // 자동 스크롤 함수
     private func scrollToBottom(proxy: ScrollViewProxy) {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             if let lastMessage = memoViewModel.response.last {
@@ -604,7 +590,6 @@ struct MemoPopup: View {
     }
 }
 
-// ✅ 키보드 감지 클래스
 class KeyboardResponder: ObservableObject {
     @Published var keyboardHeight: CGFloat = 0
     private var cancellables = Set<AnyCancellable>()
@@ -623,7 +608,6 @@ class KeyboardResponder: ObservableObject {
     }
 }
 
-// 현재 연도 반환 함수
 func thisYear() -> Int {
     let today = Date()
     let calendar = Calendar.current
@@ -632,7 +616,7 @@ func thisYear() -> Int {
 
 func formatYear(_ year: Int) -> String {
     let formatter = NumberFormatter()
-    formatter.numberStyle = .none // 쉼표 제거
+    formatter.numberStyle = .none
     return formatter.string(from: NSNumber(value: year)) ?? "\(year)"
 }
 

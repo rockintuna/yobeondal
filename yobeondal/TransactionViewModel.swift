@@ -69,18 +69,17 @@ class TransactionViewModel: ObservableObject {
         let previousMonth = (month == 1) ? 12 : month - 1
         
         httpClient.getTransactions(previousYear, previousMonth) { result in
-            DispatchQueue.main.async { // ✅ 모든 결과 처리를 메인 스레드에서 실행
+            DispatchQueue.main.async {
                 switch result {
                 case .success(let results):
-                    print("✅ HTTP Request SUCCESS")
-                    // add to this month
+                    print("HTTP Request SUCCESS")
                     results.forEach { transaction in
                         self.upsertTransactions(nil, year, month, transaction.title, transaction.amount, transaction.userName == "수진" ? 1 : 2)
                     }
                     self.getTransactions(year, month)
                 case .failure(let error):
                     print("❌ Error: \(error.localizedDescription)")
-                    self.response = [] // 🚨 실패 시 UI 업데이트가 필요하다면 이렇게 할 수도 있음
+                    self.response = []
                 }
             }
         }

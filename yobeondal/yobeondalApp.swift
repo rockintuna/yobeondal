@@ -9,7 +9,7 @@ import SwiftUI
 
 @main
 struct yobeondalApp: App {
-    @State private var isLoading = true // 로딩 상태
+    @State private var isLoading = true
     
     var body: some Scene {
         WindowGroup {
