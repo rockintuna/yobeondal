@@ -72,11 +72,11 @@ struct SelectedMonthView: View {
         self.memoViewModel = memoViewModel
     }
     
-    var backButton : some View {  // <-- 👀 커스텀 버튼
+    var backButton : some View {
         Button{
             self.presentationMode.wrappedValue.dismiss()
         } label: {
-            Image(systemName: "chevron.left") // 화살표 Image
+            Image(systemName: "chevron.left")
                 .aspectRatio(contentMode: .fit)
                 .foregroundColor(Color.black)
         }
@@ -104,7 +104,7 @@ struct SelectedMonthView: View {
                         .padding(20)
                         .foregroundStyle(buttonColor)
                     Button {
-                        print("test")
+                        loadLastMonth(year, month)
                     } label: {
                         Text("OK")
                             .padding(10)
@@ -390,6 +390,10 @@ struct SelectedMonthView: View {
                 .map { abs($0.amount) }    // 절대값 변환
                 .reduce(0, +)              // 합산
         }
+    }
+    
+    func loadLastMonth(_ year: Int,_ month: Int) {
+        self.transactionViewModel.loadLastMonthTranactions(year, month)
     }
 }
 
